@@ -1,0 +1,24 @@
+{
+  "name": "ios-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for Android developers to explore the wallet-ios-private codebase",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ios-mcp-server": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "glob": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
