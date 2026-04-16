@@ -1,175 +1,19 @@
-# ios-mcp-server
+# ai-tools
 
-An MCP server that gives AI assistants structured, read-only access to an iOS codebase. Built for cross-platform teams — Android developers, backend engineers, or anyone who needs to understand iOS code without navigating Xcode.
+A collection of AI-powered tools that help our mobile teams work in harmony across platforms. Each tool is an [MCP](https://modelcontextprotocol.io) server that plugs into Claude Code, Cursor, Windsurf, or any MCP-compatible client — giving developers a conversational interface to explore, search, and understand code across team boundaries.
 
-Point it at a git repo URL and it handles cloning, caching, and syncing automatically.
+## Available Tools
 
-## Quick Start
+### [ios-mcp-server](./ios-mcp-server)
 
-```bash
-cd ios-mcp-server
-npm install
-npm run build
-```
+Gives Android developers (or anyone outside the iOS team) structured access to the iOS codebase. Auto-clones the repo, caches it locally, and exposes 8 tools for exploring modules, extracting feature logic, searching code, mapping dependencies, and discovering API endpoints — all without opening Xcode.
 
-## Configuration
+[Setup guide](./ios-mcp-server/README.md) · [wallet-ios reference](./ios-mcp-server/docs/WALLET-IOS.md)
 
-The server runs in two modes: **URL mode** (recommended) auto-clones and caches the repo, or **local mode** if you already have a checkout.
+## Getting Started
 
-### URL mode
+Pick a tool from the list above, follow its setup guide, and add the MCP config to your editor. Each tool is self-contained with its own `package.json` and build step.
 
-```bash
-node dist/index.js --repo-url git@github.com:org/ios-repo.git
-```
+## Contributing
 
-On first start, the repo is shallow-cloned to `~/.wallet-ios-mcp/repo`. Subsequent starts reuse the cache instantly. Use the `sync_repo` tool to pull latest changes.
-
-### Local mode
-
-```bash
-node dist/index.js --repo-root /path/to/ios-repo
-```
-
-### Options
-
-| Flag | Env var | Default | Description |
-|------|---------|---------|-------------|
-| `--repo-url` | `WALLET_IOS_REPO_URL` | — | Git repo URL (clones + caches) |
-| `--repo-root` | `WALLET_IOS_REPO` | — | Path to existing local checkout |
-| `--branch` | `WALLET_IOS_BRANCH` | `dev` | Branch to track |
-| `--cache-dir` | `WALLET_IOS_CACHE` | `~/.wallet-ios-mcp/repo` | Cache directory |
-| `--auto-sync` | — | off | Pull latest on every server start |
-
-## Editor Setup
-
-### Claude Code
-
-Add to `~/.claude/claude_code_config.json` or your project's `.mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "wallet-ios": {
-      "command": "node",
-      "args": [
-        "/path/to/ios-mcp-server/dist/index.js",
-        "--repo-url",
-        "git@github.com:org/ios-repo.git"
-      ]
-    }
-  }
-}
-```
-
-### Cursor
-
-Add to `.cursor/mcp.json`:
-
-```json
-{
-  "mcpServers": {
-    "wallet-ios": {
-      "command": "node",
-      "args": [
-        "/path/to/ios-mcp-server/dist/index.js",
-        "--repo-url",
-        "git@github.com:org/ios-repo.git"
-      ]
-    }
-  }
-}
-```
-
-Add `--auto-sync` to the args array if you want fresh code on every editor restart.
-
-## Tools
-
-### `list_modules`
-
-Lists all Swift Package Manager modules with type classification (feature, platform, core, etc.), published products, and dependency info.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `filter` | string? | Filter by type (`feature`, `platform`, `core`) or name substring |
-
-### `get_feature`
-
-Deep-dives into a feature module — categorises every file as reducer, state, action, model, view, API call, repository, mock, or test. Optionally returns full source code.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `feature` | string | Feature name, e.g. `"Authentication"`, `"Transaction"` |
-| `include_source` | bool? | Include full source of key files (default: false) |
-
-### `search_code`
-
-Regex code search with context lines across the entire codebase.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | string | Search pattern (regex supported) |
-| `file_pattern` | string? | File glob, e.g. `"*.swift"` (default: `"*.swift"`) |
-| `context_lines` | number? | Lines of context around matches (default: 3) |
-| `max_results` | number? | Max matching lines (default: 50) |
-| `case_sensitive` | bool? | Case-sensitive search (default: false) |
-
-### `get_architecture`
-
-Returns a high-level architecture overview: project structure, module dependency graph, architectural patterns, and technology stack.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `section` | enum? | `overview`, `dependencies`, `patterns`, `tech_stack`, or `all` (default) |
-
-### `get_api_endpoints`
-
-Discovers API routes, request/response models, protocol definitions, and network call sites.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `feature` | string? | Scope to a feature module |
-| `search_term` | string? | Additional keyword filter |
-
-### `read_file`
-
-Reads a specific file by relative path with optional line range.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `path` | string | Relative path from repo root |
-| `start_line` | number? | Start line (1-based) |
-| `end_line` | number? | End line (1-based, max 500 lines) |
-
-### `get_feature_flags`
-
-Discovers feature flags from the namespace system — keys, where they're defined, and where they're used.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `filter` | string? | Filter by domain, e.g. `"trade"`, `"kyc"` |
-
-### `sync_repo`
-
-Pulls latest changes from the tracked branch, or reports current cache status.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `action` | enum? | `sync` (pull latest) or `status` (check cache state). Default: `sync` |
-
-## Requirements
-
-- Node.js 18+
-- Git with SSH access to the target repo
-- `ripgrep` (`rg`) recommended for faster search (falls back to `grep`)
-
-## Development
-
-```bash
-npm run dev    # Watch mode — recompiles on changes
-npm run build  # One-time build
-npm start      # Run the server
-```
-
-## Repo-Specific Docs
-
-- [wallet-ios-private](./docs/WALLET-IOS.md) — architecture notes, use cases, and example prompts for the Blockchain.com iOS app
+To add a new tool, create a directory at the root (e.g. `android-mcp-server/`, `backend-mcp-server/`), implement the MCP server, add a README, and update this file.
