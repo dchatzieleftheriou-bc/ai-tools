@@ -6,7 +6,7 @@ A collection of AI-powered tools that help our mobile teams work in harmony acro
 
 ### [ios-mcp-server](./ios-mcp-server)
 
-Gives Android developers (or anyone outside the iOS team) structured access to the iOS codebase. Auto-clones the repo, caches it locally, and exposes 8 tools for exploring modules, extracting feature logic, searching code, mapping dependencies, and discovering API endpoints — all without opening Xcode.
+Gives developers (or anyone outside the iOS team) structured access to the iOS codebase. Auto-clones the repo, caches it locally, and exposes 8 tools for exploring modules, extracting feature logic, searching code, mapping dependencies, and discovering API endpoints — all without opening Xcode.
 
 [Setup guide](./ios-mcp-server/README.md) · [wallet-ios reference](./ios-mcp-server/docs/WALLET-IOS.md)
 
