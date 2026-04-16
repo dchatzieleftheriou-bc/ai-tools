@@ -1,56 +1,50 @@
-# wallet-ios MCP Server
+# ios-mcp-server
 
-An MCP (Model Context Protocol) server that exposes the **wallet-ios-private** iOS codebase to Android developers. Connect it to Claude Code, Cursor, or any MCP-compatible client to explore iOS features, search code, understand architecture, and discover API endpoints — without needing to know Swift or navigate the iOS project structure.
+An MCP server that gives AI assistants structured, read-only access to an iOS codebase. Built for cross-platform teams — Android developers, backend engineers, or anyone who needs to understand iOS code without navigating Xcode.
+
+Point it at a git repo URL and it handles cloning, caching, and syncing automatically.
 
 ## Quick Start
 
 ```bash
-cd mcp-server
+cd ios-mcp-server
 npm install
 npm run build
 ```
 
-## Setup Modes
+## Configuration
 
-### Mode 1: Repo URL (recommended for Android devs)
+The server runs in two modes: **URL mode** (recommended) auto-clones and caches the repo, or **local mode** if you already have a checkout.
 
-Just give it the repo URL — it clones, caches, and keeps things up to date automatically. No need to manually clone the iOS repo.
-
-```bash
-node dist/index.js --repo-url git@github.com:blockchain/wallet-ios-private.git
-```
-
-The repo is shallow-cloned to `~/.wallet-ios-mcp/repo` on first use (takes ~2 min). Subsequent starts reuse the cache instantly. Use the `sync_repo` tool anytime to pull latest changes from `dev`.
-
-**Options:**
-- `--branch <name>` — Branch to track (default: `dev`)
-- `--cache-dir <path>` — Custom cache location (default: `~/.wallet-ios-mcp/repo`)
-- `--auto-sync` — Automatically pull latest on every server start
-
-### Mode 2: Local checkout
-
-If you already have the iOS repo cloned locally:
+### URL mode
 
 ```bash
-node dist/index.js --repo-root /path/to/wallet-ios-private
+node dist/index.js --repo-url git@github.com:org/ios-repo.git
 ```
 
-### Environment variables
+On first start, the repo is shallow-cloned to `~/.wallet-ios-mcp/repo`. Subsequent starts reuse the cache instantly. Use the `sync_repo` tool to pull latest changes.
 
-All CLI flags have env var equivalents:
+### Local mode
 
-| Flag | Env var | Description |
-|------|---------|-------------|
-| `--repo-url` | `WALLET_IOS_REPO_URL` | Git repo URL |
-| `--repo-root` | `WALLET_IOS_REPO` | Path to local checkout |
-| `--branch` | `WALLET_IOS_BRANCH` | Branch to track |
-| `--cache-dir` | `WALLET_IOS_CACHE` | Cache directory |
+```bash
+node dist/index.js --repo-root /path/to/ios-repo
+```
 
-## Connecting to AI Tools
+### Options
+
+| Flag | Env var | Default | Description |
+|------|---------|---------|-------------|
+| `--repo-url` | `WALLET_IOS_REPO_URL` | — | Git repo URL (clones + caches) |
+| `--repo-root` | `WALLET_IOS_REPO` | — | Path to existing local checkout |
+| `--branch` | `WALLET_IOS_BRANCH` | `dev` | Branch to track |
+| `--cache-dir` | `WALLET_IOS_CACHE` | `~/.wallet-ios-mcp/repo` | Cache directory |
+| `--auto-sync` | — | off | Pull latest on every server start |
+
+## Editor Setup
 
 ### Claude Code
 
-Add to your Claude Code MCP config (`~/.claude/claude_code_config.json` or project `.mcp.json`):
+Add to `~/.claude/claude_code_config.json` or your project's `.mcp.json`:
 
 ```json
 {
@@ -58,9 +52,9 @@ Add to your Claude Code MCP config (`~/.claude/claude_code_config.json` or proje
     "wallet-ios": {
       "command": "node",
       "args": [
-        "/path/to/mcp-server/dist/index.js",
+        "/path/to/ios-mcp-server/dist/index.js",
         "--repo-url",
-        "git@github.com:blockchain/wallet-ios-private.git"
+        "git@github.com:org/ios-repo.git"
       ]
     }
   }
@@ -69,7 +63,7 @@ Add to your Claude Code MCP config (`~/.claude/claude_code_config.json` or proje
 
 ### Cursor
 
-Add to `.cursor/mcp.json` in your Android project:
+Add to `.cursor/mcp.json`:
 
 ```json
 {
@@ -77,113 +71,95 @@ Add to `.cursor/mcp.json` in your Android project:
     "wallet-ios": {
       "command": "node",
       "args": [
-        "/path/to/mcp-server/dist/index.js",
+        "/path/to/ios-mcp-server/dist/index.js",
         "--repo-url",
-        "git@github.com:blockchain/wallet-ios-private.git"
+        "git@github.com:org/ios-repo.git"
       ]
     }
   }
 }
 ```
 
-### With auto-sync on startup
+Add `--auto-sync` to the args array if you want fresh code on every editor restart.
 
-If you want the server to always pull latest when it starts:
-
-```json
-{
-  "mcpServers": {
-    "wallet-ios": {
-      "command": "node",
-      "args": [
-        "/path/to/mcp-server/dist/index.js",
-        "--repo-url",
-        "git@github.com:blockchain/wallet-ios-private.git",
-        "--auto-sync"
-      ]
-    }
-  }
-}
-```
-
-## Available Tools
+## Tools
 
 ### `list_modules`
-List all ~95 iOS modules with type classification (feature, platform, core, etc.), their published products, and internal/external dependencies.
 
-**Example prompts:**
-- "List all feature modules in the iOS app"
-- "What modules relate to trading?"
-- "Show me the platform modules and their dependencies"
+Lists all Swift Package Manager modules with type classification (feature, platform, core, etc.), published products, and dependency info.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `filter` | string? | Filter by type (`feature`, `platform`, `core`) or name substring |
 
 ### `get_feature`
-Deep-dive into a specific feature module. Extracts and categorizes all files into: reducers, state, actions, models, views, API calls, repositories, mocks, and tests. Optionally includes full source code.
 
-**Example prompts:**
-- "Show me the Transaction feature architecture"
-- "What reducers and state models does the Authentication feature have?"
-- "Get the KYC feature with full source code of the reducers"
+Deep-dives into a feature module — categorises every file as reducer, state, action, model, view, API call, repository, mock, or test. Optionally returns full source code.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `feature` | string | Feature name, e.g. `"Authentication"`, `"Transaction"` |
+| `include_source` | bool? | Include full source of key files (default: false) |
 
 ### `search_code`
-Regex-powered code search with configurable context lines. Searches across the entire iOS codebase or filtered by file pattern.
 
-**Example prompts:**
-- "Find all usages of OrderCreationRequest"
-- "Search for swap-related API calls"
-- "Find where blockchain.ux.trade flags are checked"
+Regex code search with context lines across the entire codebase.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `query` | string | Search pattern (regex supported) |
+| `file_pattern` | string? | File glob, e.g. `"*.swift"` (default: `"*.swift"`) |
+| `context_lines` | number? | Lines of context around matches (default: 3) |
+| `max_results` | number? | Max matching lines (default: 50) |
+| `case_sensitive` | bool? | Case-sensitive search (default: false) |
 
 ### `get_architecture`
-High-level architecture overview with sections: project structure, module dependency graph, architectural patterns (TCA, Clean Architecture, DI), and technology stack.
 
-**Example prompts:**
-- "Explain the iOS app architecture"
-- "Show me the module dependency graph"
-- "What patterns does the iOS team use for state management?"
+Returns a high-level architecture overview: project structure, module dependency graph, architectural patterns, and technology stack.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `section` | enum? | `overview`, `dependencies`, `patterns`, `tech_stack`, or `all` (default) |
 
 ### `get_api_endpoints`
-Discovers API endpoints, request/response models, API protocol definitions, and network call sites. Scoped by feature or search term.
 
-**Example prompts:**
-- "What API endpoints does the Transaction feature call?"
-- "Find all request models related to swaps"
-- "Show me all API protocol definitions"
+Discovers API routes, request/response models, protocol definitions, and network call sites.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `feature` | string? | Scope to a feature module |
+| `search_term` | string? | Additional keyword filter |
 
 ### `read_file`
-Read any file from the repo by relative path, with optional line range. Use after discovering paths via other tools.
 
-**Example prompts:**
-- "Show me the EmailLoginReducer.swift file"
-- "Read lines 50-100 of the OrderCreationRequest"
+Reads a specific file by relative path with optional line range.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `path` | string | Relative path from repo root |
+| `start_line` | number? | Start line (1-based) |
+| `end_line` | number? | End line (1-based, max 500 lines) |
 
 ### `get_feature_flags`
-Discover feature flags from the BlockchainNamespace system. Shows namespace keys and where they're used across the codebase.
 
-**Example prompts:**
-- "What feature flags exist for trading?"
-- "Show me all KYC-related feature flags"
-- "List the blockchain.ux namespace keys"
+Discovers feature flags from the namespace system — keys, where they're defined, and where they're used.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `filter` | string? | Filter by domain, e.g. `"trade"`, `"kyc"` |
 
 ### `sync_repo`
-Pull latest changes from the `dev` branch, or check current sync status. The cache is preserved across server restarts.
 
-**Example prompts:**
-- "Sync the iOS repo to get the latest code"
-- "When was the iOS repo cache last updated?"
-- "What commit is the iOS repo at?"
+Pulls latest changes from the tracked branch, or reports current cache status.
 
-## Use Cases for Android Developers
-
-1. **Feature parity** — "I'm building the Swap feature on Android. Show me how iOS implements it so I can match the logic."
-2. **API discovery** — "What endpoints does the iOS Trade feature call? I need to integrate the same APIs."
-3. **Business logic extraction** — "Show me the reducer for Order Creation — I need to replicate the state machine."
-4. **Architecture reference** — "How does iOS handle dependency injection? I want to compare with our Dagger setup."
-5. **Feature flag alignment** — "What feature flags control the Earn product? We need the same gates on Android."
-6. **Stay in sync** — "Sync the iOS repo and show me what changed in the Transaction module recently."
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `action` | enum? | `sync` (pull latest) or `status` (check cache state). Default: `sync` |
 
 ## Requirements
 
 - Node.js 18+
-- Git (with SSH key configured for `git@github.com:blockchain/wallet-ios-private.git`)
+- Git with SSH access to the target repo
 - `ripgrep` (`rg`) recommended for faster search (falls back to `grep`)
 
 ## Development
@@ -193,3 +169,7 @@ npm run dev    # Watch mode — recompiles on changes
 npm run build  # One-time build
 npm start      # Run the server
 ```
+
+## Repo-Specific Docs
+
+- [wallet-ios-private](./docs/WALLET-IOS.md) — architecture notes, use cases, and example prompts for the Blockchain.com iOS app
