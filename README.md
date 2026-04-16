@@ -12,7 +12,15 @@ Gives developers (or anyone outside the iOS team) structured access to the iOS c
 
 ## Getting Started
 
-Pick a tool from the list above, follow its setup guide, and add the MCP config to your editor. Each tool is self-contained with its own `package.json` and build step.
+Each tool is a self-contained npm package. To install one:
+
+```bash
+cd <tool-directory>
+npm install && npm run build
+npm link
+```
+
+`npm link` registers the tool as a global command on your machine — no npm publishing required. After linking, add the MCP config to your editor (Claude Code, Cursor, etc.) and you're good to go. See each tool's README for the exact config.
 
 ## Contributing
 

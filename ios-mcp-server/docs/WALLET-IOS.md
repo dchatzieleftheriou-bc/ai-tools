@@ -2,15 +2,23 @@
 
 Architecture notes and usage guide for Android developers exploring the [wallet-ios-private](https://github.com/blockchain/wallet-ios-private) codebase via the MCP server.
 
+## Install
+
+```bash
+git clone git@github.com:dchatzieleftheriou-bc/ai-tools.git
+cd ai-tools/ios-mcp-server
+npm install && npm run build
+npm link
+```
+
 ## MCP Config
 
 ```json
 {
   "mcpServers": {
     "wallet-ios": {
-      "command": "node",
+      "command": "ios-mcp-server",
       "args": [
-        "/path/to/ios-mcp-server/dist/index.js",
         "--repo-url",
         "git@github.com:blockchain/wallet-ios-private.git"
       ]

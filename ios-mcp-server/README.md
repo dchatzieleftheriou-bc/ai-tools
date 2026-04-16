@@ -4,43 +4,19 @@ An MCP server that gives AI assistants structured, read-only access to an iOS co
 
 Point it at a git repo URL and it handles cloning, caching, and syncing automatically.
 
-## Quick Start
+## Install
 
 ```bash
 cd ios-mcp-server
-npm install
-npm run build
+npm install && npm run build
+npm link
 ```
 
-## Configuration
-
-The server runs in two modes: **URL mode** (recommended) auto-clones and caches the repo, or **local mode** if you already have a checkout.
-
-### URL mode
-
-```bash
-node dist/index.js --repo-url git@github.com:org/ios-repo.git
-```
-
-On first start, the repo is shallow-cloned to `~/.wallet-ios-mcp/repo`. Subsequent starts reuse the cache instantly. Use the `sync_repo` tool to pull latest changes.
-
-### Local mode
-
-```bash
-node dist/index.js --repo-root /path/to/ios-repo
-```
-
-### Options
-
-| Flag | Env var | Default | Description |
-|------|---------|---------|-------------|
-| `--repo-url` | `WALLET_IOS_REPO_URL` | — | Git repo URL (clones + caches) |
-| `--repo-root` | `WALLET_IOS_REPO` | — | Path to existing local checkout |
-| `--branch` | `WALLET_IOS_BRANCH` | `dev` | Branch to track |
-| `--cache-dir` | `WALLET_IOS_CACHE` | `~/.wallet-ios-mcp/repo` | Cache directory |
-| `--auto-sync` | — | off | Pull latest on every server start |
+`npm link` registers the `ios-mcp-server` command globally on your machine — no publishing required.
 
 ## Editor Setup
+
+After linking, the MCP config is just:
 
 ### Claude Code
 
@@ -50,9 +26,8 @@ Add to `~/.claude/claude_code_config.json` or your project's `.mcp.json`:
 {
   "mcpServers": {
     "wallet-ios": {
-      "command": "node",
+      "command": "ios-mcp-server",
       "args": [
-        "/path/to/ios-mcp-server/dist/index.js",
         "--repo-url",
         "git@github.com:org/ios-repo.git"
       ]
@@ -69,9 +44,8 @@ Add to `.cursor/mcp.json`:
 {
   "mcpServers": {
     "wallet-ios": {
-      "command": "node",
+      "command": "ios-mcp-server",
       "args": [
-        "/path/to/ios-mcp-server/dist/index.js",
         "--repo-url",
         "git@github.com:org/ios-repo.git"
       ]
@@ -80,7 +54,17 @@ Add to `.cursor/mcp.json`:
 }
 ```
 
-Add `--auto-sync` to the args array if you want fresh code on every editor restart.
+### Options
+
+Pass these as additional args or set as environment variables:
+
+| Flag | Env var | Default | Description |
+|------|---------|---------|-------------|
+| `--repo-url` | `WALLET_IOS_REPO_URL` | — | Git repo URL (clones + caches) |
+| `--repo-root` | `WALLET_IOS_REPO` | — | Path to existing local checkout |
+| `--branch` | `WALLET_IOS_BRANCH` | `dev` | Branch to track |
+| `--cache-dir` | `WALLET_IOS_CACHE` | `~/.wallet-ios-mcp/repo` | Cache directory |
+| `--auto-sync` | — | off | Pull latest on every server start |
 
 ## Tools
 
