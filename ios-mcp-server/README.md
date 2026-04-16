@@ -132,6 +132,33 @@ Discovers feature flags from the namespace system — keys, where they're define
 |-----------|------|-------------|
 | `filter` | string? | Filter by domain, e.g. `"trade"`, `"kyc"` |
 
+### `get_models`
+
+Extracts data models, DTOs, request/response structs, and enums for a feature. Shows field names, types, optionality, CodingKeys, and protocol conformances — everything needed to build the Kotlin data classes.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `feature` | string | Feature name, e.g. `"Transaction"`, `"KYC"` |
+| `include_enums` | bool? | Include enum definitions (default: true) |
+| `include_source` | bool? | Include full Swift source of each model (default: false) |
+
+### `get_navigation_flow`
+
+Traces how screens connect within a feature. Finds NavigationLinks, sheets, full screen covers, TCA Destination enums, deep links, router calls, and app events. Lists all View structs as a screen inventory.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `feature` | string | Feature name, e.g. `"Authentication"`, `"Transaction"` |
+
+### `get_di_registrations`
+
+Shows dependency injection registrations — both DIKit (factory/single with tags) and swift-dependencies (@Dependency, DependencyKey, liveValue). Helps map what's a singleton vs factory when building the Hilt/Dagger equivalent.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `feature` | string? | Scope to a feature (omit to see all) |
+| `system` | enum? | `dikit`, `dependencies`, or `all` (default) |
+
 ### `sync_repo`
 
 Pulls latest changes from the tracked branch, or reports current cache status.

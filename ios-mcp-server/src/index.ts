@@ -55,6 +55,12 @@ import {
   syncRepoTool,
   setSyncConfig,
 } from "./tools/sync-repo.js";
+import { getModelsSchema, getModels } from "./tools/get-models.js";
+import { getNavigationSchema, getNavigation } from "./tools/get-navigation.js";
+import {
+  getDiRegistrationsSchema,
+  getDiRegistrations,
+} from "./tools/get-di-registrations.js";
 
 // --- Resolve repo root (supports both URL and local modes) ---
 function resolveRepoRoot(): string | undefined {
@@ -214,6 +220,36 @@ async function main() {
     syncRepoSchema.shape,
     async (input) => {
       const result = await syncRepoTool(input);
+      return { content: [{ type: "text", text: result }] };
+    }
+  );
+
+  server.tool(
+    "get_models",
+    "Extract data models, DTOs, request/response structs, and enums for a feature. Shows field names, types, optionality, CodingKeys, and protocol conformances — everything needed to build the Kotlin equivalent.",
+    getModelsSchema.shape,
+    async (input) => {
+      const result = await getModels(input);
+      return { content: [{ type: "text", text: result }] };
+    }
+  );
+
+  server.tool(
+    "get_navigation_flow",
+    "Trace how screens connect within a feature. Finds NavigationLinks, sheets, full screen covers, TCA Destination enums, deep links, router calls, and app events. Lists all View structs as a screen inventory.",
+    getNavigationSchema.shape,
+    async (input) => {
+      const result = await getNavigation(input);
+      return { content: [{ type: "text", text: result }] };
+    }
+  );
+
+  server.tool(
+    "get_di_registrations",
+    "Show dependency injection registrations. Covers DIKit (factory/single with tags) and swift-dependencies (@Dependency, DependencyKey, liveValue). Scope to a feature or see all registrations.",
+    getDiRegistrationsSchema.shape,
+    async (input) => {
+      const result = await getDiRegistrations(input);
       return { content: [{ type: "text", text: result }] };
     }
   );
