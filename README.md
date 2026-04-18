@@ -10,6 +10,12 @@ Gives developers (or anyone outside the iOS team) structured access to the iOS c
 
 [Setup guide](./ios-mcp-server/README.md) · [wallet-ios reference](./ios-mcp-server/docs/WALLET-IOS.md)
 
+### [android-mcp-server](./android-mcp-server)
+
+Gives developers (or anyone outside the Android team) structured access to the Android codebase. Auto-clones the repo, caches it locally, and exposes 11 tools for exploring Gradle modules, extracting feature logic, data models, Compose navigation flows, Koin DI registrations, searching code, mapping dependencies, and discovering Retrofit API endpoints — all without opening Android Studio.
+
+[Setup guide](./android-mcp-server/README.md) · [wallet-android reference](./android-mcp-server/docs/WALLET-ANDROID.md)
+
 ## Getting Started
 
 Each tool is a self-contained npm package. To install one:
@@ -24,4 +30,4 @@ npm link
 
 ## Contributing
 
-To add a new tool, create a directory at the root (e.g. `android-mcp-server/`, `backend-mcp-server/`), implement the MCP server, add a README, and update this file.
+To add a new tool, create a directory at the root (e.g. `backend-mcp-server/`), implement the MCP server, add a README, and update this file.

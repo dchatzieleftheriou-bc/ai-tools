@@ -1,0 +1,36 @@
+{
+  "name": "android-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server that gives AI assistants structured access to an Android codebase",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "android-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "android",
+    "kotlin",
+    "model-context-protocol"
+  ],
+  "private": true,
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "glob": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
